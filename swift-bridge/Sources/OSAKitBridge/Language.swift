@@ -31,12 +31,36 @@ public func osa_language_for_name(_ name: UnsafePointer<CChar>?) -> UnsafeMutabl
     return osaRetain(language)
 }
 
+@_cdecl("osa_language_for_script_data_descriptor")
+public func osa_language_for_script_data_descriptor(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
+    guard let descriptorPtr else { return nil }
+    let descriptor: NSAppleEventDescriptor = osaBorrow(descriptorPtr)
+    guard let language = OSALanguage(forScriptDataDescriptor: descriptor) else {
+        return nil
+    }
+    return osaRetain(language)
+}
+
 @_cdecl("osa_language_default")
 public func osa_language_default() -> UnsafeMutableRawPointer? {
     guard let language = OSALanguage.default() else {
         return nil
     }
     return osaRetain(language)
+}
+
+@_cdecl("osa_language_set_default")
+public func osa_language_set_default(
+    _ languagePtr: UnsafeMutableRawPointer?,
+    _ errorOut: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    guard let languagePtr else {
+        osaWriteError(errorOut, "missing OSA language handle")
+        return OSA_INVALID_ARGUMENT
+    }
+    let language: OSALanguage = osaBorrow(languagePtr)
+    OSALanguage.setDefault(language)
+    return OSA_OK
 }
 
 @_cdecl("osa_language_name")
@@ -67,24 +91,4 @@ public func osa_language_shared_instance(_ languagePtr: UnsafeMutableRawPointer?
     guard let languagePtr else { return nil }
     let language: OSALanguage = osaBorrow(languagePtr)
     return osaRetain(language.sharedLanguageInstance())
-}
-
-@_cdecl("osa_language_instance_language")
-public func osa_language_instance_language(_ instancePtr: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
-    guard let instancePtr else { return nil }
-    let instance: OSALanguageInstance = osaBorrow(instancePtr)
-    return osaRetain(instance.language)
-}
-
-@_cdecl("osa_language_instance_info_json")
-public func osa_language_instance_info_json(
-    _ instancePtr: UnsafeMutableRawPointer?,
-    _ errorOut: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
-) -> UnsafeMutablePointer<CChar>? {
-    guard let instancePtr else {
-        osaWriteError(errorOut, "missing OSA language instance handle")
-        return nil
-    }
-    let instance: OSALanguageInstance = osaBorrow(instancePtr)
-    return osaCString(osaJSONString(osaLanguageInfo(instance.language)))
 }

@@ -1,10 +1,29 @@
 import Cocoa
+import Dispatch
 import OSAKit
 
 public let OSA_OK: Int32 = 0
 public let OSA_INVALID_ARGUMENT: Int32 = -1
 public let OSA_SCRIPT_ERROR: Int32 = -2
 public let OSA_FRAMEWORK_ERROR: Int32 = -3
+
+final class OSAComponentHandle {
+    let language: OSALanguage
+
+    init(_ language: OSALanguage) {
+        self.language = language
+    }
+}
+
+final class OSAComponentInstanceHandle {
+    let componentInstancePointer: UInt64
+    let language: OSALanguage
+
+    init(componentInstancePointer: UInt64, language: OSALanguage) {
+        self.componentInstancePointer = componentInstancePointer
+        self.language = language
+    }
+}
 
 @inline(__always)
 public func osaRetain(_ object: some AnyObject) -> UnsafeMutableRawPointer {
@@ -35,12 +54,29 @@ public func osaWriteError(
     errorOut?.pointee = osaCString(message)
 }
 
+@inline(__always)
+func osaOnMain<T>(_ body: () -> T) -> T {
+    if Thread.isMainThread {
+        return body()
+    }
+    return DispatchQueue.main.sync(execute: body)
+}
+
+func osaDescriptorInfo(_ descriptor: NSAppleEventDescriptor) -> [String: Any] {
+    [
+        "descriptorType": descriptor.descriptorType,
+        "int32Value": descriptor.int32Value,
+        "booleanValue": descriptor.booleanValue,
+        "stringValue": descriptor.stringValue ?? NSNull(),
+    ]
+}
+
 func osaJSONSafe(_ value: Any) -> Any {
     switch value {
     case let dict as [AnyHashable: Any]:
         var result: [String: Any] = [:]
-        for (key, value) in dict {
-            result[String(describing: key)] = osaJSONSafe(value)
+        for (key, nestedValue) in dict {
+            result[String(describing: key)] = osaJSONSafe(nestedValue)
         }
         return result
     case let array as [Any]:
@@ -50,7 +86,7 @@ func osaJSONSafe(_ value: Any) -> Any {
     case let string as String:
         return string
     case let descriptor as NSAppleEventDescriptor:
-        return descriptor.stringValue ?? "<descriptor type=\(descriptor.descriptorType)>"
+        return osaDescriptorInfo(descriptor)
     case let value as NSValue:
         return value.description
     case _ as NSNull:
@@ -69,35 +105,25 @@ func osaJSONString(_ value: Any) -> String {
     }
 }
 
-func osaErrorInfo(_ errorInfo: NSDictionary?) -> String {
-    let raw = (errorInfo as? [AnyHashable: Any]).map(osaJSONSafe) as? [String: Any] ?? [:]
-    let normalized: [String: Any] = [
-        "message": raw["OSAScriptErrorMessage"] ?? raw["NSLocalizedDescription"] ?? NSNull(),
-        "briefMessage": raw["OSAScriptErrorBriefMessage"] ?? NSNull(),
-        "number": raw["OSAScriptErrorNumber"] ?? NSNull(),
-        "appName": raw["OSAScriptErrorAppName"] ?? NSNull(),
-        "range": raw["OSAScriptErrorRange"] ?? NSNull(),
-        "raw": raw,
-    ]
-    return osaJSONString(normalized)
+func osaStorageOptions(_ rawValue: UInt64) -> OSAStorageOptions {
+    OSAStorageOptions(rawValue: UInt(rawValue))
 }
 
-func osaNSError(_ error: NSError?) -> String {
-    let raw = error.map { error in
-        [
-            "domain": error.domain,
-            "code": error.code,
-            "message": error.localizedDescription,
-            "userInfo": osaJSONSafe(error.userInfo),
-        ] as [String: Any]
-    } ?? [:]
-    let normalized: [String: Any] = [
-        "message": raw["message"] ?? NSNull(),
-        "briefMessage": NSNull(),
-        "number": raw["code"] ?? NSNull(),
-        "appName": NSNull(),
-        "range": NSNull(),
-        "raw": raw,
-    ]
-    return osaJSONString(normalized)
+func osaPath(_ path: UnsafePointer<CChar>?) -> URL? {
+    guard let path else { return nil }
+    return URL(fileURLWithPath: String(cString: path))
+}
+
+func osaCopyData(_ data: Data) -> UnsafeMutableRawPointer? {
+    let count = data.count
+    guard count > 0 else {
+        return nil
+    }
+    guard let raw = malloc(count) else {
+        return nil
+    }
+    data.withUnsafeBytes { buffer in
+        memcpy(raw, buffer.baseAddress, count)
+    }
+    return raw
 }
