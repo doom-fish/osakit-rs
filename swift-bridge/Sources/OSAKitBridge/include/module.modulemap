@@ -1,0 +1,4 @@
+module OSAKitBridge {
+    header "OSAKitBridge.h"
+    export *
+}
