@@ -125,8 +125,7 @@ fn script_handler_rich_text_and_apple_event_paths_work() {
         .is_some());
     assert!(script
         .rich_text_from_descriptor(
-            &AppleEventDescriptor::string("return \"hello world\"")
-                .expect("string descriptor")
+            &AppleEventDescriptor::string("return \"hello world\"").expect("string descriptor")
         )
         .expect("rich text conversion should succeed")
         .is_some());
