@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.1] - 2026-05-17
+
+### Fixed
+
+- Added comprehensive `// SAFETY:` comments to unsafe blocks for memory-safety documentation and FFI pointer handling.
+
 ## [0.2.0] - 2026-05-16
 
 ### Added

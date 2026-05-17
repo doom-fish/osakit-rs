@@ -427,6 +427,9 @@ impl Script {
         let storage_type = to_cstring(storage_type.as_str())?;
         let mut out_length = 0_usize;
         let mut error_ptr = ptr::null_mut();
+        // SAFETY: self.raw is a valid OSAScript pointer we own. out_length and error_ptr
+        // are properly initialized output parameters. OSAKit will write the compiled data
+        // pointer and length to these, or return null on failure.
         let raw = unsafe {
             ffi::osa_script_compiled_data(
                 self.raw,
@@ -443,7 +446,11 @@ impl Script {
                 Err(from_swift(ffi::status::SCRIPT_ERROR, error_ptr))
             };
         }
+        // SAFETY: raw is a valid pointer to out_length bytes of compiled script data
+        // allocated by OSAKit. We immediately copy it into a Vec and then free the
+        // original allocation, making this a safe transfer of ownership.
         let bytes = unsafe { std::slice::from_raw_parts(raw.cast::<u8>(), out_length) }.to_vec();
+        // SAFETY: raw was allocated by OSAKit with malloc and we are freeing it exactly once here.
         unsafe { free(raw.cast()) };
         Ok(bytes)
     }

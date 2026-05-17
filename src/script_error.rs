@@ -94,6 +94,8 @@ impl fmt::Display for OsaKitError {
 impl std::error::Error for OsaKitError {}
 
 pub fn script_error_constants() -> Result<ScriptErrorConstants, OsaKitError> {
+    // SAFETY: ffi::osa_script_error_constants_json() returns a pointer to a static,
+    // read-only C string owned by OSAKit. It is valid for the entire lifetime of the process.
     let json = unsafe { ffi::osa_script_error_constants_json() };
     if json.is_null() {
         return Err(OsaKitError::FrameworkError(
@@ -108,9 +110,14 @@ pub(crate) fn take_owned_c_string(ptr: *mut c_char) -> String {
         return String::new();
     }
 
+    // SAFETY: ptr came from Swift's OSAKit framework and is guaranteed to be a valid,
+    // null-terminated C string allocated with malloc. We convert it to a Rust String
+    // immediately and then free the original allocation, making this a safe transfer of ownership.
     let string = unsafe { core::ffi::CStr::from_ptr(ptr) }
         .to_string_lossy()
         .into_owned();
+    // SAFETY: ptr is guaranteed to have been allocated by OSAKit with malloc,
+    // and we are freeing it exactly once here.
     unsafe { free(ptr.cast()) };
     string
 }
