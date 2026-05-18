@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2] - 2026-05-18
+
+### Changed
+
+- Added concise rustdoc coverage across the public OSAKit API outside the FFI modules.
+
 ## [0.2.1] - 2026-05-17
 
 ### Fixed

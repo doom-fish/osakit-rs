@@ -14,27 +14,41 @@ use crate::script_error::{from_swift, OsaKitError};
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    /// Mirrors the `OSAScriptStorageOptions` bitmask used by `OSAKit`.
     pub struct StorageOptions: u64 {
+        /// Uses the default `OSAScriptStorageOptions` behavior.
         const NONE = 0x0000_0000;
+        /// Matches `OSAScriptStorageOptions` that omit retrievable source text.
         const PREVENT_GET_SOURCE = 0x0000_0001;
+        /// Matches `OSAScriptStorageOptions` that compile into the target context.
         const COMPILE_INTO_CONTEXT = 0x0000_0002;
+        /// Matches `OSAScriptStorageOptions` that leave the script location unchanged.
         const DONT_SET_SCRIPT_LOCATION = 0x0100_0000;
+        /// Matches `OSAScriptStorageOptions` for stay-open applets.
         const STAY_OPEN_APPLET = 0x1000_0000;
+        /// Matches `OSAScriptStorageOptions` that show an applet startup screen.
         const SHOW_STARTUP_SCREEN = 0x2000_0000;
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Enumerates the script file types supported by `OSAScript` storage APIs.
 pub enum ScriptStorageType {
+    /// Stores the script in the standard compiled script format.
     Script,
+    /// Stores the script as an `OSAKit` script bundle.
     ScriptBundle,
+    /// Stores the script as an application-style script file.
     Application,
+    /// Stores the script as an application bundle.
     ApplicationBundle,
+    /// Stores the script as plain source text.
     Text,
 }
 
 impl ScriptStorageType {
     #[must_use]
+    /// Returns the `OSAKit` storage-type string expected by `OSAScript`.
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Script => "script",
@@ -47,12 +61,16 @@ impl ScriptStorageType {
 }
 
 #[derive(Debug)]
+/// Holds the descriptor and display text returned by `OSAScript` execution.
 pub struct ScriptDisplayValue {
+    /// Contains the raw result descriptor returned by `OSAScript`.
     pub descriptor: AppleEventDescriptor,
+    /// Contains the user-visible display text returned alongside the result.
     pub display_value: Option<String>,
 }
 
 #[derive(Debug)]
+/// Wraps the `OSAScript` objects exposed by `OSAKit`.
 pub struct Script {
     pub(crate) raw: *mut c_void,
 }
@@ -62,6 +80,7 @@ impl Script {
         self.raw
     }
 
+    /// Creates an `OSAScript` from source and an optional `OSALanguage`.
     pub fn new(source: &str, language: Option<&Language>) -> Result<Self, OsaKitError> {
         let source = to_cstring(source)?;
         let mut raw = ptr::null_mut();
@@ -80,6 +99,7 @@ impl Script {
         Ok(Self { raw })
     }
 
+    /// Creates an `OSAScript` from source using `OSALanguageInstance` and storage options.
     pub fn from_source_with_options(
         source: &str,
         source_url: Option<&Path>,
@@ -108,6 +128,7 @@ impl Script {
         Ok(Self { raw })
     }
 
+    /// Loads an `OSAScript` from a script file URL.
     pub fn from_file(
         path: impl AsRef<Path>,
         language: Option<&Language>,
@@ -129,6 +150,7 @@ impl Script {
         Ok(Self { raw })
     }
 
+    /// Loads an `OSAScript` from a file URL with storage options.
     pub fn from_file_with_options(
         path: impl AsRef<Path>,
         language_instance: Option<&LanguageInstance>,
@@ -152,6 +174,7 @@ impl Script {
         Ok(Self { raw })
     }
 
+    /// Creates an `OSAScript` from compiled script data bytes.
     pub fn from_compiled_data(
         data: &[u8],
         source_url: Option<&Path>,
@@ -178,6 +201,7 @@ impl Script {
         Ok(Self { raw })
     }
 
+    /// Creates an `OSAScript` from a compiled script data descriptor.
     pub fn from_script_data_descriptor(
         descriptor: &AppleEventDescriptor,
         source_url: Option<&Path>,
@@ -205,6 +229,7 @@ impl Script {
         Ok(Self { raw })
     }
 
+    /// Reads the compiled script data descriptor stored at a script file URL.
     pub fn script_data_descriptor_from_file(
         path: impl AsRef<Path>,
     ) -> Result<AppleEventDescriptor, OsaKitError> {
@@ -218,6 +243,7 @@ impl Script {
         Ok(AppleEventDescriptor { raw })
     }
 
+    /// Returns the source text currently associated with this `OSAScript`.
     pub fn source(&self) -> Result<String, OsaKitError> {
         let ptr = unsafe { ffi::osa_script_source(self.raw) };
         if ptr.is_null() {
@@ -228,11 +254,13 @@ impl Script {
         Ok(crate::script_error::take_owned_c_string(ptr))
     }
 
+    /// Returns the rich-text source representation of this `OSAScript` when available.
     pub fn rich_text_source(&self) -> Result<Option<String>, OsaKitError> {
         let ptr = unsafe { ffi::osa_script_rich_text_source(self.raw) };
         Ok((!ptr.is_null()).then(|| crate::script_error::take_owned_c_string(ptr)))
     }
 
+    /// Returns the file URL associated with this `OSAScript` when available.
     pub fn url(&self) -> Result<Option<PathBuf>, OsaKitError> {
         let ptr = unsafe { ffi::osa_script_url(self.raw) };
         if ptr.is_null() {
@@ -244,10 +272,12 @@ impl Script {
     }
 
     #[must_use]
+    /// Reports whether `OSAKit` considers this `OSAScript` compiled.
     pub fn is_compiled(&self) -> bool {
         unsafe { ffi::osa_script_is_compiled(self.raw) }
     }
 
+    /// Returns the `OSALanguage` assigned to this `OSAScript`.
     pub fn language(&self) -> Result<Language, OsaKitError> {
         let raw = unsafe { ffi::osa_script_language(self.raw) };
         if raw.is_null() {
@@ -258,6 +288,7 @@ impl Script {
         Ok(Language { raw })
     }
 
+    /// Sets the `OSALanguage` assigned to this `OSAScript`.
     pub fn set_language(&self, language: &Language) -> Result<(), OsaKitError> {
         let mut error_ptr = ptr::null_mut();
         let status =
@@ -268,6 +299,7 @@ impl Script {
         Ok(())
     }
 
+    /// Returns the `OSALanguageInstance` assigned to this `OSAScript`.
     pub fn language_instance(&self) -> Result<LanguageInstance, OsaKitError> {
         let raw = unsafe { ffi::osa_script_language_instance(self.raw) };
         if raw.is_null() {
@@ -278,6 +310,7 @@ impl Script {
         Ok(LanguageInstance { raw })
     }
 
+    /// Sets the `OSALanguageInstance` assigned to this `OSAScript`.
     pub fn set_language_instance(&self, instance: &LanguageInstance) -> Result<(), OsaKitError> {
         let mut error_ptr = ptr::null_mut();
         let status = unsafe {
@@ -289,6 +322,7 @@ impl Script {
         Ok(())
     }
 
+    /// Compiles this `OSAScript` in place.
     pub fn compile(&self) -> Result<(), OsaKitError> {
         let mut error_ptr = ptr::null_mut();
         let status = unsafe { ffi::osa_script_compile(self.raw, &mut error_ptr) };
@@ -298,6 +332,7 @@ impl Script {
         Ok(())
     }
 
+    /// Executes this `OSAScript` and returns its result descriptor.
     pub fn execute(&self) -> Result<AppleEventDescriptor, OsaKitError> {
         let mut raw = ptr::null_mut();
         let mut error_ptr = ptr::null_mut();
@@ -308,6 +343,7 @@ impl Script {
         AppleEventDescriptor::from_raw(raw)
     }
 
+    /// Executes this `OSAScript` with an Apple event input descriptor.
     pub fn execute_apple_event(
         &self,
         event: &AppleEventDescriptor,
@@ -323,6 +359,7 @@ impl Script {
         AppleEventDescriptor::from_raw(raw)
     }
 
+    /// Executes this `OSAScript` and returns both its result and display text.
     pub fn execute_and_return_display_value(&self) -> Result<ScriptDisplayValue, OsaKitError> {
         let mut raw = ptr::null_mut();
         let mut display_ptr = ptr::null_mut();
@@ -345,6 +382,7 @@ impl Script {
         })
     }
 
+    /// Executes a named handler on this `OSAScript` with Apple event arguments.
     pub fn execute_handler(
         &self,
         name: &str,
@@ -377,6 +415,7 @@ impl Script {
         AppleEventDescriptor::from_raw(raw)
     }
 
+    /// Returns `OSAKit`-generated rich text for a result descriptor via this `OSAScript`.
     pub fn rich_text_from_descriptor(
         &self,
         descriptor: &AppleEventDescriptor,
@@ -395,6 +434,7 @@ impl Script {
         Ok(Some(crate::script_error::take_owned_c_string(ptr)))
     }
 
+    /// Writes this `OSAScript` to disk using an `OSAKit` storage type.
     pub fn write_to_file(
         &self,
         path: impl AsRef<Path>,
@@ -419,6 +459,7 @@ impl Script {
         Ok(())
     }
 
+    /// Returns compiled bytes for this `OSAScript` using an `OSAKit` storage type.
     pub fn compiled_data(
         &self,
         storage_type: ScriptStorageType,

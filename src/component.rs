@@ -11,29 +11,38 @@ use crate::script_error::{from_swift, OsaKitError};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+/// Summarizes the Carbon OSA component backing an `OSALanguage`.
 pub struct OsaComponentSummary {
+    /// Holds the raw Carbon `ComponentInstance` pointer value reported by `OSAKit`.
     pub component_instance_pointer: u64,
+    /// Captures the `OSALanguage` summary reported for the component.
     pub language: LanguageSummary,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+/// Summarizes the Carbon OSA component instance backing an `OSALanguageInstance`.
 pub struct OsaComponentInstanceSummary {
+    /// Holds the raw Carbon `ComponentInstance` pointer value reported by `OSAKit`.
     pub component_instance_pointer: u64,
+    /// Captures the `OSALanguage` summary reported for the component.
     pub language: LanguageSummary,
 }
 
 #[derive(Debug)]
+/// Wraps the Carbon OSA component resolved for an `OSALanguage`.
 pub struct OsaComponent {
     raw: *mut c_void,
 }
 
 #[derive(Debug)]
+/// Wraps the Carbon OSA component instance resolved for an `OSALanguageInstance`.
 pub struct OsaComponentInstance {
     raw: *mut c_void,
 }
 
 impl OsaComponent {
+    /// Resolves this wrapper from an `OSALanguage`.
     pub fn from_language(language: &Language) -> Result<Self, OsaKitError> {
         let raw = unsafe { ffi::osa_component_from_language(language.raw) };
         if raw.is_null() {
@@ -44,6 +53,7 @@ impl OsaComponent {
         Ok(Self { raw })
     }
 
+    /// Resolves this wrapper from an `OSALanguageInstance`.
     pub fn from_language_instance(instance: &LanguageInstance) -> Result<Self, OsaKitError> {
         let raw = unsafe { ffi::osa_component_from_language_instance(instance.raw) };
         if raw.is_null() {
@@ -54,6 +64,7 @@ impl OsaComponent {
         Ok(Self { raw })
     }
 
+    /// Returns the `OSALanguage` associated with this OSA component.
     pub fn language(&self) -> Result<Language, OsaKitError> {
         let raw = unsafe { ffi::osa_component_language(self.raw) };
         if raw.is_null() {
@@ -64,6 +75,7 @@ impl OsaComponent {
         Ok(Language { raw })
     }
 
+    /// Returns summary metadata for this OSA component.
     pub fn summary(&self) -> Result<OsaComponentSummary, OsaKitError> {
         let mut error_ptr = ptr::null_mut();
         let json = unsafe { ffi::osa_component_summary_json(self.raw, &mut error_ptr) };
@@ -84,6 +96,7 @@ impl Drop for OsaComponent {
 }
 
 impl OsaComponentInstance {
+    /// Resolves this wrapper from an `OSALanguage`.
     pub fn from_language(language: &Language) -> Result<Self, OsaKitError> {
         let raw = unsafe { ffi::osa_component_instance_from_language(language.raw) };
         if raw.is_null() {
@@ -94,6 +107,7 @@ impl OsaComponentInstance {
         Ok(Self { raw })
     }
 
+    /// Resolves this wrapper from an `OSALanguageInstance`.
     pub fn from_language_instance(instance: &LanguageInstance) -> Result<Self, OsaKitError> {
         let raw = unsafe { ffi::osa_component_instance_from_language_instance(instance.raw) };
         if raw.is_null() {
@@ -104,6 +118,7 @@ impl OsaComponentInstance {
         Ok(Self { raw })
     }
 
+    /// Returns the backing OSA component for this component instance.
     pub fn component(&self) -> Result<OsaComponent, OsaKitError> {
         let raw = unsafe { ffi::osa_component_instance_component(self.raw) };
         if raw.is_null() {
@@ -114,6 +129,7 @@ impl OsaComponentInstance {
         Ok(OsaComponent { raw })
     }
 
+    /// Returns summary metadata for this OSA component instance.
     pub fn summary(&self) -> Result<OsaComponentInstanceSummary, OsaKitError> {
         let mut error_ptr = ptr::null_mut();
         let json = unsafe { ffi::osa_component_instance_summary_json(self.raw, &mut error_ptr) };
