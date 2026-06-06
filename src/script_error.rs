@@ -136,8 +136,9 @@ impl std::error::Error for OsaKitError {}
 
 /// Returns the script-error key strings exported by `OSAKit`.
 pub fn script_error_constants() -> Result<ScriptErrorConstants, OsaKitError> {
-    // SAFETY: ffi::osa_script_error_constants_json() returns a pointer to a static,
-    // read-only C string owned by OSAKit. It is valid for the entire lifetime of the process.
+    // SAFETY: ffi::osa_script_error_constants_json() returns a freshly malloc'd,
+    // null-terminated C string that transfers ownership to the caller. decode_json()
+    // takes ownership and frees it exactly once via take_owned_c_string().
     let json = unsafe { ffi::osa_script_error_constants_json() };
     if json.is_null() {
         return Err(OsaKitError::FrameworkError(
