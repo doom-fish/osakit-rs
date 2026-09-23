@@ -76,7 +76,7 @@ impl Language {
     /// Lists the languages exposed by `OSALanguage.availableLanguages`.
     pub fn available_languages() -> Result<Vec<LanguageSummary>, OsaKitError> {
         let mut error_ptr = ptr::null_mut();
-        let json = unsafe { ffi::osa_language_available_languages_json(&mut error_ptr) };
+        let json = unsafe { ffi::osa_language_available_languages_json(&raw mut error_ptr) };
         if json.is_null() {
             return Err(from_swift(ffi::status::FRAMEWORK_ERROR, error_ptr));
         }
@@ -108,7 +108,7 @@ impl Language {
     /// Sets the default `OSALanguage` used by `OSAKit`.
     pub fn set_default(language: &Self) -> Result<(), OsaKitError> {
         let mut error_ptr = ptr::null_mut();
-        let status = unsafe { ffi::osa_language_set_default(language.raw, &mut error_ptr) };
+        let status = unsafe { ffi::osa_language_set_default(language.raw, &raw mut error_ptr) };
         if status != ffi::status::OK {
             return Err(from_swift(status, error_ptr));
         }
@@ -132,7 +132,7 @@ impl Language {
     /// Returns summary metadata for this `OSALanguage`.
     pub fn summary(&self) -> Result<LanguageSummary, OsaKitError> {
         let mut error_ptr = ptr::null_mut();
-        let json = unsafe { ffi::osa_language_info_json(self.raw, &mut error_ptr) };
+        let json = unsafe { ffi::osa_language_info_json(self.raw, &raw mut error_ptr) };
         if json.is_null() {
             return Err(from_swift(ffi::status::FRAMEWORK_ERROR, error_ptr));
         }

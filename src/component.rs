@@ -78,7 +78,7 @@ impl OsaComponent {
     /// Returns summary metadata for this OSA component.
     pub fn summary(&self) -> Result<OsaComponentSummary, OsaKitError> {
         let mut error_ptr = ptr::null_mut();
-        let json = unsafe { ffi::osa_component_summary_json(self.raw, &mut error_ptr) };
+        let json = unsafe { ffi::osa_component_summary_json(self.raw, &raw mut error_ptr) };
         if json.is_null() {
             return Err(from_swift(ffi::status::FRAMEWORK_ERROR, error_ptr));
         }
@@ -132,7 +132,8 @@ impl OsaComponentInstance {
     /// Returns summary metadata for this OSA component instance.
     pub fn summary(&self) -> Result<OsaComponentInstanceSummary, OsaKitError> {
         let mut error_ptr = ptr::null_mut();
-        let json = unsafe { ffi::osa_component_instance_summary_json(self.raw, &mut error_ptr) };
+        let json =
+            unsafe { ffi::osa_component_instance_summary_json(self.raw, &raw mut error_ptr) };
         if json.is_null() {
             return Err(from_swift(ffi::status::FRAMEWORK_ERROR, error_ptr));
         }

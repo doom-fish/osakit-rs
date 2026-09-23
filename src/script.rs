@@ -89,8 +89,8 @@ impl Script {
             ffi::osa_script_new(
                 source.as_ptr(),
                 language.map_or(ptr::null_mut(), |language| language.raw),
-                &mut raw,
-                &mut error_ptr,
+                &raw mut raw,
+                &raw mut error_ptr,
             )
         };
         if status != ffi::status::OK {
@@ -118,8 +118,8 @@ impl Script {
                     .map_or(ptr::null(), |path| path.as_ptr()),
                 language_instance.map_or(ptr::null_mut(), |instance| instance.raw),
                 storage_options.bits(),
-                &mut raw,
-                &mut error_ptr,
+                &raw mut raw,
+                &raw mut error_ptr,
             )
         };
         if status != ffi::status::OK {
@@ -140,8 +140,8 @@ impl Script {
             ffi::osa_script_from_file(
                 path.as_ptr(),
                 language.map_or(ptr::null_mut(), |language| language.raw),
-                &mut raw,
-                &mut error_ptr,
+                &raw mut raw,
+                &raw mut error_ptr,
             )
         };
         if status != ffi::status::OK {
@@ -164,8 +164,8 @@ impl Script {
                 path.as_ptr(),
                 language_instance.map_or(ptr::null_mut(), |instance| instance.raw),
                 storage_options.bits(),
-                &mut raw,
-                &mut error_ptr,
+                &raw mut raw,
+                &raw mut error_ptr,
             )
         };
         if status != ffi::status::OK {
@@ -191,8 +191,8 @@ impl Script {
                     .as_ref()
                     .map_or(ptr::null(), |path| path.as_ptr()),
                 storage_options.bits(),
-                &mut raw,
-                &mut error_ptr,
+                &raw mut raw,
+                &raw mut error_ptr,
             )
         };
         if status != ffi::status::OK {
@@ -219,8 +219,8 @@ impl Script {
                     .map_or(ptr::null(), |path| path.as_ptr()),
                 language_instance.map_or(ptr::null_mut(), |instance| instance.raw),
                 storage_options.bits(),
-                &mut raw,
-                &mut error_ptr,
+                &raw mut raw,
+                &raw mut error_ptr,
             )
         };
         if status != ffi::status::OK {
@@ -236,7 +236,7 @@ impl Script {
         let path = path_to_cstring(path.as_ref())?;
         let mut error_ptr = ptr::null_mut();
         let raw =
-            unsafe { ffi::osa_script_data_descriptor_from_file(path.as_ptr(), &mut error_ptr) };
+            unsafe { ffi::osa_script_data_descriptor_from_file(path.as_ptr(), &raw mut error_ptr) };
         if raw.is_null() {
             return Err(from_swift(ffi::status::FRAMEWORK_ERROR, error_ptr));
         }
@@ -292,7 +292,7 @@ impl Script {
     pub fn set_language(&self, language: &Language) -> Result<(), OsaKitError> {
         let mut error_ptr = ptr::null_mut();
         let status =
-            unsafe { ffi::osa_script_set_language(self.raw, language.raw, &mut error_ptr) };
+            unsafe { ffi::osa_script_set_language(self.raw, language.raw, &raw mut error_ptr) };
         if status != ffi::status::OK {
             return Err(from_swift(status, error_ptr));
         }
@@ -314,7 +314,7 @@ impl Script {
     pub fn set_language_instance(&self, instance: &LanguageInstance) -> Result<(), OsaKitError> {
         let mut error_ptr = ptr::null_mut();
         let status = unsafe {
-            ffi::osa_script_set_language_instance(self.raw, instance.raw, &mut error_ptr)
+            ffi::osa_script_set_language_instance(self.raw, instance.raw, &raw mut error_ptr)
         };
         if status != ffi::status::OK {
             return Err(from_swift(status, error_ptr));
@@ -325,7 +325,7 @@ impl Script {
     /// Compiles this `OSAScript` in place.
     pub fn compile(&self) -> Result<(), OsaKitError> {
         let mut error_ptr = ptr::null_mut();
-        let status = unsafe { ffi::osa_script_compile(self.raw, &mut error_ptr) };
+        let status = unsafe { ffi::osa_script_compile(self.raw, &raw mut error_ptr) };
         if status != ffi::status::OK {
             return Err(from_swift(status, error_ptr));
         }
@@ -336,7 +336,7 @@ impl Script {
     pub fn execute(&self) -> Result<AppleEventDescriptor, OsaKitError> {
         let mut raw = ptr::null_mut();
         let mut error_ptr = ptr::null_mut();
-        let status = unsafe { ffi::osa_script_execute(self.raw, &mut raw, &mut error_ptr) };
+        let status = unsafe { ffi::osa_script_execute(self.raw, &raw mut raw, &raw mut error_ptr) };
         if status != ffi::status::OK {
             return Err(from_swift(status, error_ptr));
         }
@@ -351,7 +351,12 @@ impl Script {
         let mut raw = ptr::null_mut();
         let mut error_ptr = ptr::null_mut();
         let status = unsafe {
-            ffi::osa_script_execute_apple_event(self.raw, event.as_ptr(), &mut raw, &mut error_ptr)
+            ffi::osa_script_execute_apple_event(
+                self.raw,
+                event.as_ptr(),
+                &raw mut raw,
+                &raw mut error_ptr,
+            )
         };
         if status != ffi::status::OK {
             return Err(from_swift(status, error_ptr));
@@ -367,9 +372,9 @@ impl Script {
         let status = unsafe {
             ffi::osa_script_execute_and_return_display_value(
                 self.raw,
-                &mut raw,
-                &mut display_ptr,
-                &mut error_ptr,
+                &raw mut raw,
+                &raw mut display_ptr,
+                &raw mut error_ptr,
             )
         };
         if status != ffi::status::OK {
@@ -405,8 +410,8 @@ impl Script {
                     raw_arguments.as_ptr()
                 },
                 raw_arguments.len(),
-                &mut raw,
-                &mut error_ptr,
+                &raw mut raw,
+                &raw mut error_ptr,
             )
         };
         if status != ffi::status::OK {
@@ -422,7 +427,11 @@ impl Script {
     ) -> Result<Option<String>, OsaKitError> {
         let mut error_ptr = ptr::null_mut();
         let ptr = unsafe {
-            ffi::osa_script_rich_text_from_descriptor(self.raw, descriptor.as_ptr(), &mut error_ptr)
+            ffi::osa_script_rich_text_from_descriptor(
+                self.raw,
+                descriptor.as_ptr(),
+                &raw mut error_ptr,
+            )
         };
         if ptr.is_null() {
             return if error_ptr.is_null() {
@@ -450,7 +459,7 @@ impl Script {
                 path.as_ptr(),
                 storage_type.as_ptr(),
                 storage_options.bits(),
-                &mut error_ptr,
+                &raw mut error_ptr,
             )
         };
         if status != ffi::status::OK {
@@ -476,8 +485,8 @@ impl Script {
                 self.raw,
                 storage_type.as_ptr(),
                 storage_options.bits(),
-                &mut out_length,
-                &mut error_ptr,
+                &raw mut out_length,
+                &raw mut error_ptr,
             )
         };
         if raw.is_null() {

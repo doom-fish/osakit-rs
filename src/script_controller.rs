@@ -42,7 +42,7 @@ impl ScriptController {
     pub fn new() -> Result<Self, OsaKitError> {
         let mut raw = ptr::null_mut();
         let mut error_ptr = ptr::null_mut();
-        let status = unsafe { ffi::osa_script_controller_new(&mut raw, &mut error_ptr) };
+        let status = unsafe { ffi::osa_script_controller_new(&raw mut raw, &raw mut error_ptr) };
         if status != ffi::status::OK {
             return Err(from_swift(status, error_ptr));
         }
@@ -62,7 +62,7 @@ impl ScriptController {
             ffi::osa_script_controller_set_script_view(
                 self.raw,
                 script_view.map_or(ptr::null_mut(), |script_view| script_view.raw),
-                &mut error_ptr,
+                &raw mut error_ptr,
             )
         };
         if status != ffi::status::OK {
@@ -84,7 +84,7 @@ impl ScriptController {
             ffi::osa_script_controller_set_script(
                 self.raw,
                 script.map_or(ptr::null_mut(), Script::as_ptr),
-                &mut error_ptr,
+                &raw mut error_ptr,
             )
         };
         if status != ffi::status::OK {
@@ -106,7 +106,7 @@ impl ScriptController {
             ffi::osa_script_controller_set_language(
                 self.raw,
                 language.map_or(ptr::null_mut(), |language| language.raw),
-                &mut error_ptr,
+                &raw mut error_ptr,
             )
         };
         if status != ffi::status::OK {
@@ -135,7 +135,8 @@ impl ScriptController {
     /// Asks `OSAScriptController` to compile its current script.
     pub fn compile_script(&self) -> Result<(), OsaKitError> {
         let mut error_ptr = ptr::null_mut();
-        let status = unsafe { ffi::osa_script_controller_compile_script(self.raw, &mut error_ptr) };
+        let status =
+            unsafe { ffi::osa_script_controller_compile_script(self.raw, &raw mut error_ptr) };
         if status != ffi::status::OK {
             return Err(from_swift(status, error_ptr));
         }
@@ -145,7 +146,8 @@ impl ScriptController {
     /// Asks `OSAScriptController` to begin recording.
     pub fn record_script(&self) -> Result<(), OsaKitError> {
         let mut error_ptr = ptr::null_mut();
-        let status = unsafe { ffi::osa_script_controller_record_script(self.raw, &mut error_ptr) };
+        let status =
+            unsafe { ffi::osa_script_controller_record_script(self.raw, &raw mut error_ptr) };
         if status != ffi::status::OK {
             return Err(from_swift(status, error_ptr));
         }
@@ -155,7 +157,7 @@ impl ScriptController {
     /// Asks `OSAScriptController` to run its current script.
     pub fn run_script(&self) -> Result<(), OsaKitError> {
         let mut error_ptr = ptr::null_mut();
-        let status = unsafe { ffi::osa_script_controller_run_script(self.raw, &mut error_ptr) };
+        let status = unsafe { ffi::osa_script_controller_run_script(self.raw, &raw mut error_ptr) };
         if status != ffi::status::OK {
             return Err(from_swift(status, error_ptr));
         }
@@ -165,7 +167,8 @@ impl ScriptController {
     /// Asks `OSAScriptController` to stop the current run or recording.
     pub fn stop_script(&self) -> Result<(), OsaKitError> {
         let mut error_ptr = ptr::null_mut();
-        let status = unsafe { ffi::osa_script_controller_stop_script(self.raw, &mut error_ptr) };
+        let status =
+            unsafe { ffi::osa_script_controller_stop_script(self.raw, &raw mut error_ptr) };
         if status != ffi::status::OK {
             return Err(from_swift(status, error_ptr));
         }

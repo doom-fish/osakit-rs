@@ -19,8 +19,9 @@ impl LanguageInstance {
     pub fn new(language: &Language) -> Result<Self, OsaKitError> {
         let mut raw = ptr::null_mut();
         let mut error_ptr = ptr::null_mut();
-        let status =
-            unsafe { ffi::osa_language_instance_new(language.raw, &mut raw, &mut error_ptr) };
+        let status = unsafe {
+            ffi::osa_language_instance_new(language.raw, &raw mut raw, &raw mut error_ptr)
+        };
         if status != ffi::status::OK {
             return Err(from_swift(status, error_ptr));
         }
@@ -46,7 +47,7 @@ impl LanguageInstance {
     /// Returns summary metadata for this `OSALanguageInstance`.
     pub fn summary(&self) -> Result<LanguageSummary, OsaKitError> {
         let mut error_ptr = ptr::null_mut();
-        let json = unsafe { ffi::osa_language_instance_info_json(self.raw, &mut error_ptr) };
+        let json = unsafe { ffi::osa_language_instance_info_json(self.raw, &raw mut error_ptr) };
         if json.is_null() {
             return Err(from_swift(ffi::status::FRAMEWORK_ERROR, error_ptr));
         }
@@ -74,7 +75,7 @@ impl LanguageInstance {
             ffi::osa_language_instance_set_default_target(
                 self.raw,
                 target.map_or(ptr::null_mut(), AppleEventDescriptor::as_ptr),
-                &mut error_ptr,
+                &raw mut error_ptr,
             )
         };
         if status != ffi::status::OK {
@@ -93,7 +94,7 @@ impl LanguageInstance {
             ffi::osa_language_instance_rich_text_from_descriptor(
                 self.raw,
                 descriptor.as_ptr(),
-                &mut error_ptr,
+                &raw mut error_ptr,
             )
         };
         if ptr.is_null() {
