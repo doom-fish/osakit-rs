@@ -6,6 +6,7 @@ public let OSA_OK: Int32 = 0
 public let OSA_INVALID_ARGUMENT: Int32 = -1
 public let OSA_SCRIPT_ERROR: Int32 = -2
 public let OSA_FRAMEWORK_ERROR: Int32 = -3
+public let OSA_MAIN_THREAD_REQUIRED: Int32 = -4
 
 final class OSAComponentHandle {
     let language: OSALanguage
@@ -55,11 +56,23 @@ public func osaWriteError(
 }
 
 @inline(__always)
-func osaOnMain<T>(_ body: () -> T) -> T {
-    if Thread.isMainThread {
-        return body()
+func osaRequireMainThread(_ errorOut: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?) -> Bool {
+    guard Thread.isMainThread else {
+        osaWriteError(errorOut, "OSAScriptView and OSAScriptController must be used on the main thread")
+        return false
     }
-    return DispatchQueue.main.sync(execute: body)
+    return true
+}
+
+@_cdecl("osa_main_thread_object_release")
+public func osa_main_thread_object_release(_ ptr: UnsafeMutableRawPointer?) {
+    guard let ptr else { return }
+    let object = Unmanaged<AnyObject>.fromOpaque(ptr)
+    if Thread.isMainThread {
+        object.release()
+    } else {
+        DispatchQueue.main.async { object.release() }
+    }
 }
 
 func osaDescriptorInfo(_ descriptor: NSAppleEventDescriptor) -> [String: Any] {

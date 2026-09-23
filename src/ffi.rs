@@ -3,6 +3,7 @@ pub mod status {
     pub const INVALID_ARGUMENT: i32 = -1;
     pub const SCRIPT_ERROR: i32 = -2;
     pub const FRAMEWORK_ERROR: i32 = -3;
+    pub const MAIN_THREAD_REQUIRED: i32 = -4;
 }
 
 mod component;

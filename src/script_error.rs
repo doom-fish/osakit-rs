@@ -89,6 +89,7 @@ pub enum OsaKitError {
     ScriptError(Box<ScriptErrorDetails>),
     /// Carries a non-script framework error reported by `OSAKit`.
     FrameworkError(String),
+    MainThreadRequired(String),
     /// Carries an unclassified `OSAKit` status code and message.
     Unknown {
         /// Stores the raw `OSAKit` status code.
@@ -106,6 +107,7 @@ impl OsaKitError {
             Self::InvalidArgument(_) => ffi::status::INVALID_ARGUMENT,
             Self::ScriptError(_) => ffi::status::SCRIPT_ERROR,
             Self::FrameworkError(_) => ffi::status::FRAMEWORK_ERROR,
+            Self::MainThreadRequired(_) => ffi::status::MAIN_THREAD_REQUIRED,
             Self::Unknown { code, .. } => *code,
         }
     }
@@ -121,6 +123,7 @@ impl OsaKitError {
                 .unwrap_or_else(|| "OSAKit script execution failed".into()),
             Self::InvalidArgument(message)
             | Self::FrameworkError(message)
+            | Self::MainThreadRequired(message)
             | Self::Unknown { message, .. } => message.clone(),
         }
     }
@@ -179,6 +182,7 @@ pub(crate) fn from_status_message(status: i32, message: String) -> OsaKitError {
     match status {
         ffi::status::INVALID_ARGUMENT => OsaKitError::InvalidArgument(message),
         ffi::status::FRAMEWORK_ERROR => OsaKitError::FrameworkError(message),
+        ffi::status::MAIN_THREAD_REQUIRED => OsaKitError::MainThreadRequired(message),
         code => OsaKitError::Unknown { code, message },
     }
 }

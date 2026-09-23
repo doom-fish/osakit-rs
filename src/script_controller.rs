@@ -176,7 +176,7 @@ impl ScriptController {
 impl Drop for ScriptController {
     fn drop(&mut self) {
         if !self.raw.is_null() {
-            unsafe { ffi::osa_object_release(self.raw) };
+            unsafe { ffi::osa_main_thread_object_release(self.raw) };
             self.raw = ptr::null_mut();
         }
     }

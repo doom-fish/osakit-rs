@@ -2,6 +2,7 @@ use core::ffi::{c_char, c_void};
 
 unsafe extern "C" {
     pub fn osa_object_release(ptr: *mut c_void);
+    pub fn osa_main_thread_object_release(ptr: *mut c_void);
 
     pub fn osa_descriptor_int32(value: i32) -> *mut c_void;
     pub fn osa_descriptor_string(value: *const c_char) -> *mut c_void;
