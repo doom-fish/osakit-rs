@@ -2,7 +2,16 @@
 
 Safe Rust bindings for Apple's [OSAKit](https://developer.apple.com/documentation/osakit) framework on macOS.
 
-> **Status:** v0.2.0 covers `OSALanguage`, `OSALanguageInstance`, `OSAScript`, `OSAScriptError`, `OSAScriptController`, `OSAScriptView`, and OSA component metadata round-trips, including script storage, compiled-data loading, controller actions, and AppKit editor configuration.
+> **Status:** v0.3 covers `OSALanguage`, `OSALanguageInstance`, `OSAScript`, `OSAScriptError`, `OSAScriptController`, `OSAScriptView`, and OSA component metadata round-trips, including script storage, compiled-data loading, controller actions, and AppKit editor configuration.
+
+## Installation
+
+```toml
+[dependencies]
+osakit-rs = "0.3"
+```
+
+The library is imported as `osakit`.
 
 ## Quick start
 
