@@ -76,6 +76,8 @@ Legend:
 
 ## OSAScriptController.h
 
+`ScriptController` must be used on the main thread; `ScriptController::new` returns `OsaKitError::MainThreadRequired` elsewhere.
+
 | API | Status | Notes |
 | --- | --- | --- |
 | `OSAScriptState` | ✅ | `ScriptState`. |
@@ -91,6 +93,8 @@ Legend:
 | `-stopScript:` | ✅ | `ScriptController::stop_script()`. |
 
 ## OSAScriptView.h
+
+`ScriptView` must be used on the main thread; `ScriptView::new` returns `OsaKitError::MainThreadRequired` elsewhere.
 
 | API | Status | Notes |
 | --- | --- | --- |

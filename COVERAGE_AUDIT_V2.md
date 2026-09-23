@@ -8,6 +8,8 @@ COVERAGE_PCT: 100.0
 
 Audit performed by enumerating all public Objective-C interfaces, methods, properties, and constants from the five OSAKit framework headers (OSALanguage.h, OSALanguageInstance.h, OSAScript.h, OSAScriptView.h, OSAScriptController.h) in MacOSX26.2.sdk. The crate exposes these symbols via a Rust safe wrapper backed by a Swift bridge layer. All 91 public macOS-available symbols are accounted for: 89 are actively wrapped and 2 deprecated constructors (10.6+) are intentionally omitted in favor of non-deprecated alternatives.
 
+_Re-checked on 2026-09-23 against the installed MacOSX26.5.sdk OSAKit headers: every declared class, method, property, and constant name still appears below. The counts are per header symbol and do not describe threading: `OSAScriptView` and `OSAScriptController` members work only on the main thread._
+
 ## 🟢 VERIFIED
 
 | Symbol | Kind | Header | Wrapped by |

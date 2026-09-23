@@ -10,6 +10,8 @@ GAPS: 0
 EXEMPT: 2
 COVERAGE_PCT: 100.0%
 
+_Re-checked on 2026-09-23 against the installed MacOSX26.5.sdk OSAKit headers: every declared class, method, property, and constant name still appears below. The counts are per header symbol and do not describe threading: `OSAScriptView` and `OSAScriptController` members work only on the main thread._
+
 ## 🟢 VERIFIED
 
 ### OSALanguage.h
