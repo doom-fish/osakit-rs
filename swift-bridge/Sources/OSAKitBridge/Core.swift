@@ -95,7 +95,7 @@ func osaJSONSafe(_ value: Any) -> Any {
     case let array as [Any]:
         return array.map(osaJSONSafe)
     case let number as NSNumber:
-        return number
+        return number.doubleValue.isFinite ? number : NSNull()
     case let string as String:
         return string
     case let descriptor as NSAppleEventDescriptor:
@@ -110,8 +110,12 @@ func osaJSONSafe(_ value: Any) -> Any {
 }
 
 func osaJSONString(_ value: Any) -> String {
+    let safe = osaJSONSafe(value)
+    guard JSONSerialization.isValidJSONObject(safe) else {
+        return "{}"
+    }
     do {
-        let data = try JSONSerialization.data(withJSONObject: osaJSONSafe(value), options: [.sortedKeys])
+        let data = try JSONSerialization.data(withJSONObject: safe, options: [.sortedKeys])
         return String(data: data, encoding: .utf8) ?? "{}"
     } catch {
         return "{}"
