@@ -58,7 +58,7 @@ fn script_round_trips_across_file_and_data_constructors() {
     let compiled_data = from_source
         .compiled_data(ScriptStorageType::Script, StorageOptions::NONE)
         .expect("compiled data should be produced");
-    assert!(!compiled_data.is_empty());
+    assert_ne!(compiled_data, [] as [u8; 0]);
 
     let from_compiled = Script::from_compiled_data(&compiled_data, None, StorageOptions::NONE)
         .expect("compiled-data constructor should work");

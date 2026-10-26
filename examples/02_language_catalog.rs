@@ -2,7 +2,7 @@ use osakit::{Language, LanguageFeatures};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let languages = Language::available_languages()?;
-    assert!(!languages.is_empty());
+    assert_ne!(languages, [] as [osakit::LanguageSummary; 0]);
 
     let apple_script = Language::for_name("AppleScript")?
         .ok_or_else(|| "AppleScript language missing".to_string())?;

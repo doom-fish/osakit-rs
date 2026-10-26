@@ -5,7 +5,7 @@ use osakit::{Language, LanguageFeatures, Script, ScriptStorageType, StorageOptio
 #[test]
 fn language_catalog_and_defaults_are_available() {
     let languages = Language::available_languages().expect("language list should load");
-    assert!(!languages.is_empty());
+    assert_ne!(languages, [] as [osakit::LanguageSummary; 0]);
 
     let apple_script = common::apple_script_language();
     let summary = apple_script
